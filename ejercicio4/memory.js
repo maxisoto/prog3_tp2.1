@@ -21,15 +21,29 @@ class Card {
       `;
         return cardElement;
     }
+    
 
-    #flip() {
+    flip() {
         const cardElement = this.element.querySelector(".card");
         cardElement.classList.add("flipped");
     }
 
-    #unflip() {
+    unflip() {
         const cardElement = this.element.querySelector(".card");
         cardElement.classList.remove("flipped");
+    }
+
+    toggleFlip() {
+        this.isFlipped = !this.isFlipped;
+        if (this.isFlipped) {
+            this.flip();
+        } else {
+            this.unflip();
+        }
+    }
+
+    matches(otherCard) {
+        return this.name === otherCard.name;
     }
 }
 
@@ -39,6 +53,28 @@ class Board {
         this.fixedGridElement = document.querySelector(".fixed-grid");
         this.gameBoardElement = document.getElementById("game-board");
     }
+
+    shuffleCards() {
+        for (let i = this.cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+        }
+    }
+
+    reset() {
+        this.flipDownAllCards();
+        this.shuffleCards();
+        // Otras acciones de reinicio si es necesario
+    }
+
+    flipDownAllCards() {
+        this.cards.forEach(card => {
+            card.isFlipped = false;
+            card.unflip(); // Llama al método para desvoltear la carta (si existe)
+        });
+    }
+
+
 
     #calculateColumns() {
         const numCards = this.cards.length;
@@ -91,6 +127,23 @@ class MemoryGame {
         this.board.onCardClick = this.#handleCardClick.bind(this);
         this.board.reset();
     }
+    checkForMatch() {
+        const [card1, card2] = this.flippedCards;
+        if (card1.matches(card2)) {
+            this.matchedCards.push(card1, card2);
+            // Aquí puedes realizar otras acciones si es necesario
+        } else {
+            // Aquí puedes realizar acciones cuando las cartas no coinciden
+        }
+        this.flippedCards = []; // Reinicia las cartas volteadas
+    }
+
+    resetGame() {
+        this.shuffleCards();
+        // Otras acciones de reinicio si es necesario
+    }
+
+    
 
     #handleCardClick(card) {
         if (this.flippedCards.length < 2 && !card.isFlipped) {
