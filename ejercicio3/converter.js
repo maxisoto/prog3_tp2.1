@@ -6,11 +6,43 @@ class Currency {
 }
 
 class CurrencyConverter {
-    constructor() {}
+    constructor(apiUrl) {
+        this.apiUrl = apiUrl;
+        this.currencies = []; // iniciamos un arreglo vacio para guardar las monedas
+    }
 
-    getCurrencies(apiUrl) {}
+    async getCurrencies(){
+        {
+           try {
+               const response = await fetch(`${this.apiUrl}/currencies`);
+               const data = await response.json();
+       
+               // instacioamos y actualizamos el valor de currencies
+               this.currencies = Object.keys(data).map(code => new Currency(code, data[code]));
+           } catch (error) {
+               console.error('Error al obtener las monedas:', error);
+           }
+       }
+   }
 
-    convertCurrency(amount, fromCurrency, toCurrency) {}
+   async convertCurrency(amount, fromCurrency, toCurrency) {
+    try {
+        if (fromCurrency.code === toCurrency.code) {
+            // si Las monedas son iguales, no es necesario hacer la petición
+            return amount;
+        }
+
+        const response = await fetch(`${this.apiUrl}/latest?amount=${amount}&from=${fromCurrency.code}&to=${toCurrency.code}`);
+        const data = await response.json();
+
+        // Obtenemos  el monto convertido segun las monedas elegidas
+        const convertedAmount = data.rates[toCurrency.code];
+        return convertedAmount;
+    } catch (error) {
+        console.error('Error al realizar la conversión:', error);
+        return null;
+    }
+}
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
